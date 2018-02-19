@@ -1,0 +1,118 @@
+#include <iostream>
+
+using namespace std;
+
+const int max_index = 100;
+
+struct sparse{
+	int l, h, n;
+	int index[ max_index ][ 3 ];
+};
+
+void shower( sparse a ){
+	int sw;
+	for( int i = 0; i < a.h; i ++ ){
+		for( int j = 0; j < a.l; j ++ ){
+			sw = 0;
+			for( int k = 0; k < a.n; k ++ ){
+				if( i == a.index[ k ][ 0 ] - 1 && j == a.index[ k ][ 1 ] - 1){
+					cout << a.index[ k ][ 2 ] <<"\t";
+					sw = 1;
+				}
+			}
+			if( !sw ){
+				cout << "0\t";
+			}
+		}
+		cout << endl;
+	}
+}
+
+//coordinates should be sorted first in rows then in calumns
+
+int main()
+{
+	sparse a, b;
+	//cout << "enter height, length and number of none-zero numbers of A:\n";
+	cin >> a.h >> a.l >> a.n;
+	for( int i = 0; i < a.n; i ++ ){
+		//printf("enter position of %d'th number of A:\n", i + 1 );
+		cin >> a.index[ i ][ 0 ] >> a.index[ i ][ 1 ] >> a.index[ i ][ 2 ];
+	}
+	//cout << "enter height, length and number of none-zero numbers of B:\n";
+	cin >> b.h >> b.l >> b.n;
+	for( int i = 0; i < b.n; i ++ ){
+		//printf("enter position of %d'th number of B:\n", i + 1 );
+		cin >> b.index[ i ][ 0 ] >> b.index[ i ][ 1 ] >> b.index[ i ][ 2 ];
+	}
+	if( a.h != b.h ){
+		cout << "Wrong input !\n";
+		return 1;
+	}
+	if( a.l != b.l ){
+		cout << "Wrong input !\n";
+		return 1;
+	}
+	sparse c;
+	c.h = a.h;
+	c.l = a.l;
+	c.n = 0;
+	//\\//\\//\\//
+	int i, j;
+	i = j = 0;
+	int p = 0;
+	while( i < a.n && j < b.n ){
+		if( a.index[ i ][ 0 ] == b.index[ j ][ 0 ] && a.index[ i ][ 1 ] == b.index[ j ][ 1 ] ){
+			if( !( a.index[ i ][ 2 ] + b.index[ j ][ 2 ] ) ){
+				i ++;
+				j ++;
+				continue;
+			}
+			c.index[ p ][ 0 ] = a.index[ i ][ 0 ];
+			c.index[ p ][ 1 ] = a.index[ i ][ 1 ];
+			c.index[ p ][ 2 ] = a.index[ i ][ 2 ] + b.index[ j ][ 2 ];
+			i ++;
+			j ++;
+			p ++;
+		}else if( a.index[ i ][ 0 ] == b.index[ j ][ 0 ] && a.index[ i ][ 1 ] <= b.index[ j ][ 1 ] ){
+			c.index[ p ][ 0 ] = a.index[ i ][ 0 ];
+			c.index[ p ][ 1 ] = a.index[ i ][ 1 ];
+			c.index[ p ][ 2 ] = a.index[ i ][ 2 ];
+			i ++;
+			p ++;
+		}else if( a.index[ i ][ 0 ] == b.index[ j ][ 0 ] && a.index[ i ][ 1 ] >= b.index[ j ][ 1 ] ){
+			c.index[ p ][ 0 ] = b.index[ j ][ 0 ];
+			c.index[ p ][ 1 ] = b.index[ j ][ 1 ];
+			c.index[ p ][ 2 ] = b.index[ j ][ 2 ];
+			j ++;
+			p ++;
+		}else if( a.index[ i ][ 0 ] > b.index[ j ][ 0 ] ){
+			c.index[ p ][ 0 ] = b.index[ j ][ 0 ];
+			c.index[ p ][ 1 ] = b.index[ j ][ 1 ];
+			c.index[ p ][ 2 ] = b.index[ j ][ 2 ];
+			j ++;
+			p ++;
+		}else{
+			c.index[ p ][ 0 ] = a.index[ i ][ 0 ];
+			c.index[ p ][ 1 ] = a.index[ i ][ 1 ];
+			c.index[ p ][ 2 ] = a.index[ i ][ 2 ];
+			i ++;
+			p ++;
+		}
+	}
+	for(; i < a.n; i ++ ){
+		c.index[ p ][ 0 ] = a.index[ i ][ 0 ];
+		c.index[ p ][ 1 ] = a.index[ i ][ 1 ];
+		c.index[ p ][ 2 ] = a.index[ i ][ 2 ];
+		p ++;
+	}
+	for(; j < b.n; j ++ ){
+		c.index[ p ][ 0 ] = a.index[ j ][ 0 ];
+		c.index[ p ][ 1 ] = a.index[ j ][ 1 ];
+		c.index[ p ][ 2 ] = a.index[ j ][ 2 ];
+		p ++;
+	}
+	c.n = p;
+	shower( c );
+	return 0;
+}

@@ -1,0 +1,486 @@
+#include< stdio.h >
+#include< conio.h >
+
+struct sentence {
+	int exp;              //the exponent
+	float coef;           //the coefficient
+};
+
+struct poly {
+	sentence terms[ 100 ];
+	int num;              //the number of sentences in a polynomial
+};
+
+void print( poly a )
+{
+	for(int i = 0; i < a.num; i ++ )
+	{
+		printf("%+f x ^ %d", a.terms[ i ].coef, a.terms[ i ].exp );
+	}
+	printf("\n\n");
+}
+
+//calculate the value of power : a ^ n
+double power( double a, int n )
+{
+	double temp = 1;
+	for( int i = 0; i < n; i ++ )
+		temp *= a;
+	return temp;
+}
+
+//a method delete the terms which their coefficients are 0
+poly make_polynomial_checkCoefficients( poly a )
+{
+	for( int i = 0; i < a.num; i ++ )
+	{
+		if( !a.terms[ i ].coef )
+		{
+			for( int j = i; j < a.num - 1; j ++ )
+			{
+				a.terms[ j ].coef = a.terms[ j + 1 ].coef;
+				a.terms[ j ].exp = a.terms[ j + 1 ].exp;
+			}
+			a.num --;
+		}
+	}
+	return a;
+}
+
+//a method checks the equal exponents and add coefficients if they are
+poly make_polynomial_checkExponents( poly a )
+{
+	for( int i = 0; i < a.num; i ++ )
+	{
+		for( int j = i + 1; j < a.num; j ++ )
+		{
+			if(  a.terms[ i ].exp == a.terms[ j ].exp )
+			{
+				a.terms[ i ].coef += a.terms[ j ].coef;
+				for( int k = j; k < a.num - 1; k ++ )
+				{
+					a.terms[ k ].coef = a.terms[ k + 1 ].coef;
+					a.terms[ k ].exp = a.terms[ k + 1 ].exp;
+				}
+				a.num --;
+			}
+		}
+	}
+	return a;
+}
+
+//a method for sorting the polynomial
+poly sort( poly a )
+{
+	sentence temp;
+	int i, sw, n = a.num;
+	do {
+		sw = 1;
+		n --;
+		for( i = 0; i < n; i ++ )
+		{
+			if( a.terms[ i ].exp < a.terms[ i + 1 ].exp )
+			{
+				temp = a.terms[ i ];
+				a.terms[ i ] = a.terms[ i + 1 ];
+				a.terms[ i + 1 ] = temp;
+				sw = 0;
+			}//end if
+		}//end for
+	}while( !sw );
+	return a;
+}
+
+//a method to calculate the value entered by user
+double value_calculating( poly a , double x )
+{
+	double val = 0;
+	for( int i = 0; i < a.num; i ++ )
+		val += a.terms[ i ].coef * power ( x , a.terms[ i ].exp );
+	return val;
+}
+
+//a method to calculate a number which is the derive of main polynomial by user values
+double derived_calculate( poly a, double x, double dx )
+{
+	return ( value_calculating( a, x + dx ) - value_calculating( a, x ) ) / dx;
+}
+
+//a method to calculate a number which is the integral of main polynomial by user values
+double integral_calculate( poly a, double x1, double x2, double n )
+{
+	double val = 0, v = 0;
+	double dx = ( x2 - x1 ) / n;
+	val += value_calculating( a, x1);
+	val += value_calculating( a, x2);
+	for( double i = x1; i < x2; i += dx )
+	{
+		v += value_calculating( a, i );
+	}
+	val += 2 * v;
+	return val * dx / 2;
+}
+
+//a method to calculate a polynomial which is the derive of main polynomial
+poly derive( poly a )
+{
+	for( int i = 0; i < a.num; i ++ )
+	{
+		a.terms[ i ].coef = a.terms[ i ].coef * a.terms[ i ].exp;
+		a.terms[ i ].exp = a.terms[ i ].exp --;
+	}
+	a = make_polynomial_checkCoefficients( a );
+	a = make_polynomial_checkExponents( a );
+	return sort( a );
+}
+
+//a method to calculate a polynomial which is the integral of main polynomial
+poly integral( poly a )
+{
+	for( int i = 0; i < a.num; i ++ )
+	{
+		a.terms[ i ].exp ++;
+		a.terms[ i ].coef = a.terms[ i ].coef / a.terms[ i ].exp;
+	}
+	a = make_polynomial_checkCoefficients( a );
+	a = make_polynomial_checkExponents( a );
+	return sort( a );
+}
+
+//a method to add two polynomial
+poly summary( poly a, poly b )
+{
+	poly c;
+	c.num = 0;
+	int i = 0, j = 0, k = 0;
+	while( i < a.num && j < b.num )
+	{
+		if( a.terms[ i ].exp > b.terms[ j ].exp )
+		{
+			c.terms[ k ] = a.terms[ i ];
+			c.num ++;
+			i ++;
+			k ++;
+		}
+		else if( a.terms[ i ].exp < b.terms[ j ].exp )
+		{
+			c.terms[ k ] = b.terms[ j ];
+			c.num ++;
+			j ++;
+			k ++;
+		}
+		else
+		{
+			c.terms[ k ].exp = a.terms[ i ].exp;
+			c.terms[ k ].coef = a.terms[ i ].coef + b.terms[ j ].coef;
+			c.num ++;
+			i ++;
+			j ++;
+			k ++;
+		}
+	}//end while
+	for(int l = i; l < a.num; l ++, k ++ )
+	{
+		c.terms[ k ] = a.terms[ l ];
+		c.num ++;
+	}
+	for(int l = j; l < b.num; l ++, k ++ )
+	{
+		c.terms[ k ] = b.terms[ l ];
+		c.num ++;
+	}
+	c = make_polynomial_checkCoefficients( c );
+	c = make_polynomial_checkExponents( c );
+	c = sort( c );
+	return c;
+}
+
+//a method to multyply two polynomial
+poly multiply( poly a, poly b )
+{
+	int k = 0;
+	poly c;
+	c.num = 0;
+	for( int i = 0; i < a.num; i ++ )
+	{
+		for( int j = 0; j < b.num; j ++ )
+		{
+			c.terms[ k ].coef = a.terms[ i ].coef * b.terms[ j ].coef;
+			c.terms[ k ].exp = a.terms[ i ].exp + b.terms[ j ].exp;
+			c.num ++;
+			k ++;
+		}
+	}
+	c = make_polynomial_checkCoefficients( c );
+	c = make_polynomial_checkExponents( c );
+	c = sort( c );
+	return c;
+}
+
+int main()
+{
+	poly A, B, C, D;
+	//after a turn of act if the user enter yes to save polynomial, ans_sw is true .with this , the program save one of last polynomials user entered
+	bool ans_sw = false;
+	char ans;
+	int i, code;
+	double x, dx, y;
+	//by this variable program ends( if its value is zero )
+	int sw = 1;
+	while( sw )
+	{
+		printf("what do you want to do :\n\n1-summary of two polynomial\n\n2-multiply of two polynomial\n\n");
+		printf("3-calculating the value of a polynomial\n\n4-calculate the derive of a polynomial\n\n5-calculate the integral of a polynomial\n\n");
+		printf("6-calculate the value of derive of a polynomial\n\n7-calculate the value of integral of a polynomial\n\n8-exit\n\n");
+		//ask the act user want to do
+		//if the user enter a wrong number it is re-show the menu
+		printf("\nenter the code of operation :\n\n");
+		scanf("%d", &code );
+		switch( code )
+		{
+			//a choice for add two polynomial
+		case 1 :
+			if( !ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			printf("enter the number of terms in polynomial B :\n");
+			scanf("%d", &B.num );
+			printf("enter the coefficient and the exponent of terms B :\n");
+			for( i = 0; i < B.num; i ++ )
+			{
+				scanf("%f %d", &B.terms[ i ].coef, &B.terms[ i ].exp );
+			}
+			A = make_polynomial_checkExponents( A );
+			B = make_polynomial_checkExponents( B );
+			A = make_polynomial_checkCoefficients( A );
+			B = make_polynomial_checkCoefficients( B );
+			A = sort( A );
+			B = sort( B );
+			C = summary(A, B);
+			print( C );
+			break;
+			//a choice for multiply two polynomial
+		case 2 :
+			if( ! ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			printf("enter the number of terms in polynomial B :\n");
+			scanf("%d", &B.num );
+			printf("enter the coefficient and the exponent of terms B :\n");
+			for( i = 0; i < B.num; i ++ )
+			{
+				scanf("%f %d", &B.terms[ i ].coef, &B.terms[ i ].exp );
+			}
+			A = make_polynomial_checkExponents( A );
+			B = make_polynomial_checkExponents( B );
+			A = make_polynomial_checkCoefficients( A );
+			B = make_polynomial_checkCoefficients( B );
+			A = sort( A );
+			B = sort( B );
+			C = multiply(A, B);
+			print( C );
+			break;
+			//a choice for calculating a value
+		case 3 :
+			if( !ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			printf("enter the value of the x\n\n");
+			scanf("%lf", &x);
+			printf("\n\n%f\n\n", value_calculating( A, x ));
+			break;
+			//a choice for calculate the derive of polynomial
+		case 4 :
+			if( !ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			A = make_polynomial_checkExponents( A );
+			A = make_polynomial_checkCoefficients( A );
+			C = derive( A );
+			print( C );
+			break;
+			//a choice for calculate the integral of polynomial
+		case 5 :
+			if( !ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			A = make_polynomial_checkExponents( A );
+			A = make_polynomial_checkCoefficients( A );
+			C = integral( A );
+			print( C );
+			break;
+			//a choice for calculate the number of derive of polynomial
+		case 6 :
+			if( !ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			A = make_polynomial_checkExponents( A );
+			A = make_polynomial_checkCoefficients( A );
+			printf("enter the value of the x and dx\n\n");
+			scanf("%lf %lf", &x, &dx);
+			printf("\n\n%f\n\n", derived_calculate(A, x, dx));
+			break;
+			//a choice for calculate the number of integral of polynomial
+		case 7 :
+			if( !ans_sw )
+			{
+				printf("enter the number of terms in polynomial A :\n");
+				scanf("%d", &A.num );
+				printf("enter the coefficient and the exponent of terms A :\n");
+				for( i = 0; i < A.num; i ++ )
+				{
+					scanf("%f %d", &A.terms[ i ].coef, &A.terms[ i ].exp );
+				}
+			}
+			else
+			{
+				A = D;
+				ans_sw = false;
+			}
+			A = make_polynomial_checkExponents( A );
+			A = make_polynomial_checkCoefficients( A );
+			printf("enter the value of the x1 and x2 and n\n\n");
+			scanf("%lf %lf %lf", &x, &y, &dx );
+			printf("\n\n%lf\n\n", integral_calculate(A, x, y, dx));
+			break;
+			//a choice for end program
+		case 8 :
+			sw = 0;
+		}//end switch
+		if( code > 0 && code < 9 )
+			ans_sw = false;
+		if( code == 1 || code == 2 )
+		{
+			printf("do you want to use last polynomials ? y\t\tn\n");
+			ans = getch();
+			if( ans == 'y' )
+			{
+				printf("choose what you want\n1-A\n2-B\n3-result\n\n");
+				scanf("%d", &code );
+				switch( code )
+				{
+				case 1 :
+					D = A;
+					ans_sw = true;
+					break;
+				case 2 :
+					D = B;
+					ans_sw = true;
+					break;
+				case 3 :
+					D = C;
+					ans_sw = true;
+					break;
+				default :
+					ans_sw = false;
+				}
+			}
+		}
+		else if( code == 4 || code == 5 )
+		{
+			printf("do you want to use last polynomials ? y\t\tn\n");
+			ans = getch();
+			if( ans == 'y' )
+			{
+				printf("choose what you want\n1-A\n2-result\n\n");
+				scanf("%d", &code );
+				switch( code )
+				{
+				case 1 :
+					D = A;
+					ans_sw = true;
+					break;
+				case 2 :
+					D = C;
+					ans_sw = true;
+					break;
+				default :
+					ans_sw = false;
+				}
+			}
+		}
+		else if( code == 3 || code == 6 || code == 7 )
+		{
+			printf("do you want to use last polynomial ? y\t\tn\n\n");
+			ans = getch();
+			if( ans == 'y' )
+			{
+				D = A;
+				ans_sw = true;
+			}
+		}
+	}//end while
+	return 0;
+}

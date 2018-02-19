@@ -1,0 +1,84 @@
+#include <iostream>
+
+using namespace std;
+
+class node{
+public:
+	int info;
+	node *next;
+private:
+};
+
+class Linking_list_circular{
+private:
+	node *last;
+public:
+	Linking_list_circular();
+	void insert( int );
+	void printList() const ;
+};
+
+Linking_list_circular::Linking_list_circular(){
+	last = NULL;
+}
+
+void Linking_list_circular::insert( int x ){
+	node *p, *q, *temp;
+	p = new node;
+	p->info = x;
+	p->next = p;
+	if( !last ){
+		last = p;
+		return;
+	}
+
+	q = last->next;
+	temp = last->next;
+	while( temp->info < x && temp != last ){
+		q = temp;
+		temp = temp -> next;
+	}
+	if( last == temp && last->info < p->info){
+		p->next = last->next;
+		last->next = p;
+		last = p;
+	}else if( last == temp ){
+		q->next = p;
+		p->next = last;
+	}
+	else if(temp == last->next){
+		p->next = q;
+		last->next = p;
+	}
+	else{
+		p->next = q->next;
+		q->next = p;
+	}
+}
+
+void Linking_list_circular::printList() const {
+
+	node *count = last->next;
+	while ( count != last ){
+		cout << count->info << endl;
+		count = count->next;
+	}
+	cout<< count->info << endl ;
+}
+int main(){
+	Linking_list_circular l;
+	l.insert( 5 );
+	l.insert( 7 );
+	l.insert( 3 );
+	l.insert( 4 );
+	l.insert( 14 );
+	l.insert( 25454 );
+	l.insert( 234 );
+	l.insert( 24 );
+	l.insert( 0);
+	l.insert( 2544 );
+	l.insert( 24 );
+	l.insert( 4 );
+    l.printList();
+	return 0;
+}

@@ -1,0 +1,266 @@
+#include<stdio.h>
+#include<conio.h>
+#include<Windows.h>
+#include<ctime>
+
+int xcourse = 5, ycourse = 5, playersw = 0;
+char mark;
+int base[3][3] = {0}, winsw = 0;
+
+char map[19][32] = {
+	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '.', '-', '-', '-', '.', '-', '-', '-', '.', '-', '-', '-', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '.', '-', '-', '-', '.', '-', '-', '-', '.', '-', '-', '-', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '.', '-', '-', '-', '.', '-', '-', '-', '.', '-', '-', '-', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', '.', '-', '-', '-', '.', '-', '-', '-', '.', '-', '-', '-', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', 's', 'a', 'e', 'e', 'd', ' ', 'a', 't', 'a', 'e', 'e', ' ', ' ', '9', '2', '1', '2', '4', '3', '0', '1', '0', '0', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+	{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+};
+
+void setTextColor(int textColor, int backColor = 0)
+{
+	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	int colorAttribute = backColor << 4 | textColor;
+	SetConsoleTextAttribute(consoleHandle, colorAttribute);
+}
+
+void sleep(unsigned int mseconds)
+{
+	clock_t goal = mseconds + clock();
+	while (goal > clock());
+}
+
+void clrscr()
+{
+	system("cls");
+}
+
+void gotoxy(int x, int y)
+{
+	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD cursorCoord;
+	cursorCoord.X = x;
+	cursorCoord.Y = y;
+	SetConsoleCursorPosition(consoleHandle, cursorCoord);
+}
+
+void maps()
+{
+	int i, j;
+	for (i = 0; i<19; i++)
+	{
+		for (j = 0; j < 32; j++)
+		{
+			printf("%c", map[i][j]);
+		}
+		printf("\n");
+	}
+}
+
+void playerrand()
+{
+	if(playersw == 0)
+	{
+		gotoxy(18, 7);
+		setTextColor(8, 4);
+		printf("player 1");
+		gotoxy(18, 9);
+		setTextColor(1, 0);
+		printf("player 2");
+	}
+	else if(playersw == 1)
+	{
+		gotoxy(18, 9);
+		setTextColor(8, 4);
+		printf("player 2");
+		gotoxy(18, 7);
+		setTextColor(1, 0);
+		printf("player 1");
+	}
+}
+
+void player()
+{
+	if(playersw == 0)
+		while(mark != 'o')
+		{
+			mark = getch();
+			if(mark == -32) break;
+		}
+	else
+		while(mark != 'x')
+		{
+			mark = getch();
+			if(mark == -32) break;
+		}
+}
+
+void win()
+{
+	int i, j;
+	for(i = 0; i < 3;i ++)
+	{
+		if(base[i][0] && base[i][0] == base[i][1] && base[i][1] == base[i][2]) winsw = 1;
+		if(base[0][i] && base[0][i] == base[1][i] && base[1][i] == base[2][i]) winsw = 1;
+	}
+	if(base[0][0] && base[0][0] == base[1][1] && base[1][1] == base[2][2]) winsw = 1;
+	if(base[2][0] && base[0][2] == base[1][1] && base[1][1] == base[2][0]) winsw = 1;
+}
+
+int pot()
+{
+	int i, j, e = 1;
+	for(i = 0; i < 3; i ++)
+		for(j = 0; j < 3; j ++)
+			if(!base[i][j]) e = 0;
+	return(e);
+}
+
+void winner()
+{
+	int p;
+	gotoxy(18, 5);
+	if(playersw == 0) p = 2;
+	else p = 1;
+	printf("player %d won!",p);
+	gotoxy(0, 20);
+}
+
+void course()
+{
+	char x;
+	int i = 0,j = 0, p;
+	playerrand();
+	gotoxy(xcourse, ycourse);
+	setTextColor(4, 0);
+	player();
+	if(playersw == 0 && mark == 'o' && base[i][j] == 0)
+	{
+		base[i][j] = 1;
+		printf("%c", mark);
+		playersw = 1;
+	}
+	while(winsw == 0)
+	{
+		playerrand();
+		if(playersw == 0)
+			setTextColor(4, 0);
+		else if(playersw == 1)
+			setTextColor(9, 0);
+		gotoxy(xcourse, ycourse);
+		x = getch();
+		if(x == -32)
+			x = getch();
+		switch(x)
+		{
+		case 77:
+			if(xcourse == 13) break;
+			xcourse += 4;
+			i++;
+			gotoxy(xcourse, ycourse);
+			player();
+			if(playersw == 0 && mark == 'o' && base[i][j] == 0)
+			{
+				base[i][j] = 1;
+				printf("%c", mark);
+				playersw = 1;
+			}
+			else if(playersw == 1 && mark == 'x' && base[i][j] == 0)
+			{
+				base[i][j] = 2;
+				printf("%c", mark);
+				playersw = 0;
+			}
+			else mark = ' ';
+			break;
+		case 80:
+			if(ycourse == 13) break;
+			ycourse += 4;
+			j++;
+			gotoxy(xcourse, ycourse);
+			player();
+			if(playersw == 0 && mark == 'o' && base[i][j] == 0)
+			{
+				base[i][j] = 1;
+				printf("%c", mark);
+				playersw = 1;
+			}
+			else if(playersw == 1 && mark == 'x' && base[i][j] == 0)
+			{
+				base[i][j] = 2;
+				printf("%c", mark);
+				playersw = 0;
+			}
+			else mark = ' ';
+			break;
+		case 75:
+			if(xcourse == 5) break;
+			xcourse -= 4;
+			i--;
+			gotoxy(xcourse, ycourse);
+			player();
+			if(playersw == 0 && mark == 'o' && base[i][j] == 0)
+			{
+				base[i][j] = 1;
+				printf("%c", mark);
+				playersw = 1;
+			}
+			else if(playersw == 1 && mark == 'x' && base[i][j] == 0)
+			{
+				base[i][j] = 2;
+				printf("%c", mark);
+				playersw = 0;
+			}
+			else mark = ' ';
+			break;
+		case 72:
+			if(ycourse == 5) break;
+			ycourse -= 4;
+			j--;
+			gotoxy(xcourse, ycourse);
+			player();
+			if(playersw == 0 && mark == 'o' && base[i][j] == 0)
+			{
+				base[i][j] = 1;
+				printf("%c", mark);
+				playersw = 1;
+			}
+			else if(playersw == 1 && mark == 'x' && base[i][j] == 0)
+			{
+				base[i][j] = 2;
+				printf("%c", mark);
+				playersw = 0;
+			}
+			else mark = ' ';
+		}
+		win();
+		if(pot() == 1)
+			break;
+	}
+	if(winsw == 0)
+	{
+		gotoxy(18, 5);
+		printf("Pot!");
+		gotoxy(0, 20);
+	}
+	else winner();
+}
+
+void main()
+{
+	maps();
+	course();
+	sleep(1700);
+}
