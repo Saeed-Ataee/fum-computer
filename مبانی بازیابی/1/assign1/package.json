@@ -1,0 +1,11 @@
+{
+  "name": "assign1",
+  "version": "1.0.0",
+  "description": "task number one",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Saeed Ataee (9212430100)",
+  "license": "ISC"
+}
